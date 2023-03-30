@@ -1,19 +1,23 @@
 import "reflect-metadata";
+
+import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
 import * as tq from "type-graphql";
-import { ApolloServer } from "apollo-server"``;
-import { context } from "./context";
-import { resolvers } from "@generated/type-graphql";
+import { Context, context } from "./context";
+import { UserResolver } from "./resolvers";
 
 const app = async () => {
   const schema = await tq.buildSchema({
-    resolvers,
+    resolvers: [UserResolver],
   });
 
-  new ApolloServer({ schema, context: context }).listen({ port: 4000 }, () =>
-    console.log(
-      `🚀 Server ready at: http://localhost:4000\n⭐️ See sample queries: http://pris.ly/e/ts/graphql-typegraphql-crud#using-the-graphql-api`
-    )
-  );
+  const server = new ApolloServer<Context>({ schema });
+  const { url } = await startStandaloneServer(server, {
+    listen: { port: 4000 },
+    context,
+  });
+
+  console.log(`🚀 Server ready at ${url}`);
 };
 
 app();
