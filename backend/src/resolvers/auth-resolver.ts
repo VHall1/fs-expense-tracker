@@ -18,8 +18,6 @@ export class AuthResolver {
       },
     });
 
-    console.log({ user });
-
     if (!user) {
       return false;
     }
@@ -31,8 +29,6 @@ export class AuthResolver {
 
   @Query(() => User, { nullable: true })
   async me(@Ctx() ctx: Context): Promise<User | null> {
-    console.log(ctx.req.session);
-
     if (!ctx.req.session.userId) {
       return null;
     }
