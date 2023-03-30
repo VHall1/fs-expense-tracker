@@ -5,7 +5,7 @@ import { Context } from "../context";
 @Resolver(User)
 export class UserResolver {
   @Query(() => User, { nullable: true })
-  show(@Ctx() ctx: Context, @Arg("id") id: User["id"]): Promise<User | null> {
+  show(@Ctx() ctx: Context, @Arg("id") id: string): Promise<User | null> {
     return ctx.prisma.user.findUnique({
       where: { id },
     });
