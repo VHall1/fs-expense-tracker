@@ -2,7 +2,7 @@
   "name": "expense-tracker-backend",
   "version": "1.0.0",
   "scripts": {
-    "watch": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/index.ts",
+    "watch": "ts-node-dev --respawn --transpile-only src/index.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
