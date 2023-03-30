@@ -1,6 +1,9 @@
 {
   "name": "expense-tracker-backend",
   "version": "1.0.0",
+  "scripts": {
+    "postinstall": "prisma generate"
+  },
   "dependencies": {
     "@prisma/client": "4.12.0"
   },
