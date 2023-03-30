@@ -1,4 +1,5 @@
-import { Arg, Ctx, Mutation, Resolver } from "type-graphql";
+import { User } from "@generated/type-graphql";
+import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { Context } from "../context";
 
 @Resolver()
@@ -23,8 +24,23 @@ export class AuthResolver {
       return false;
     }
 
-    // TODO: set cookie & redis session
-    // ctx.req.session.userId = user.id;
+    ctx.req.session.userId = user.id;
+
     return true;
+  }
+
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() ctx: Context): Promise<User | null> {
+    console.log(ctx.req.session);
+
+    if (!ctx.req.session.userId) {
+      return null;
+    }
+
+    return await ctx.prisma.user.findUnique({
+      where: {
+        id: ctx.req.session.userId,
+      },
+    });
   }
 }
