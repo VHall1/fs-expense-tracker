@@ -8,8 +8,13 @@ export class AuthResolver {
     @Ctx() ctx: Context,
     @Arg("email") email: string
   ): Promise<Boolean> {
-    const user = await ctx.prisma.user.findUnique({
+    const user = await ctx.prisma.user.upsert({
       where: { email },
+      update: {},
+      create: {
+        email,
+        username: email.split("@")[0],
+      },
     });
 
     console.log({ user });
