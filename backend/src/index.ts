@@ -13,7 +13,7 @@ import http from "http";
 import * as redis from "redis";
 import * as tq from "type-graphql";
 import { Context } from "./context";
-import { AuthResolver, UserResolver } from "./resolvers";
+import { AccountResolver, AuthResolver, UserResolver } from "./resolvers";
 
 const app = async () => {
   const app = express();
@@ -21,7 +21,7 @@ const app = async () => {
 
   const server = new ApolloServer<Context>({
     schema: await tq.buildSchema({
-      resolvers: [AuthResolver, UserResolver],
+      resolvers: [AuthResolver, UserResolver, AccountResolver],
     }),
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
