@@ -58,7 +58,7 @@ const app = async () => {
     }),
     json(),
     expressMiddleware(server, {
-      context: async ({ req }) => ({ prisma, req }),
+      context: async ({ req, res }) => ({ prisma, req, res }),
     })
   );
 

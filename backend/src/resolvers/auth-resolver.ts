@@ -27,6 +27,22 @@ export class AuthResolver {
     return true;
   }
 
+  @Mutation(() => Boolean)
+  async logout(@Ctx() ctx: Context): Promise<Boolean> {
+    return new Promise((resolve) =>
+      ctx.req.session.destroy((err) => {
+        if (err) {
+          console.log(err);
+          resolve(false);
+          return;
+        }
+
+        ctx.res.clearCookie("qid");
+        resolve(true);
+      })
+    );
+  }
+
   @Query(() => User, { nullable: true })
   async me(@Ctx() ctx: Context): Promise<User | null> {
     if (!ctx.req.session.userId) {
