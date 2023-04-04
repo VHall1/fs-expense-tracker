@@ -2,26 +2,14 @@ import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { Box, createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-
-import { Login } from "./pages/auth/login";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./routes";
 
 const theme = createTheme({
   palette: {
     mode: "dark",
   },
 });
-
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <div>Hello world!</div>,
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -37,6 +25,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             new ApolloClient({
               uri: "http://localhost:4000/",
               cache: new InMemoryCache(),
+              credentials: "include",
             })
           }
         >

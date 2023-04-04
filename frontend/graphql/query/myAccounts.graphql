@@ -1,0 +1,11 @@
+query MyAccounts {
+  me {
+    accounts {
+      id
+      name
+      balance
+      active
+      currency
+    }
+  }
+}

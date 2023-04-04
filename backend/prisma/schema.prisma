@@ -15,18 +15,23 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid()) @map("_id")
-  email     String    @unique
-  username  String?
-  accounts  Account[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id                    String                @id @default(cuid()) @map("_id")
+  email                 String                @unique
+  username              String?
+  /// @TypeGraphQL.omit(output: true)
+  password              String
+  accounts              Account[]
+  transactionCategories TransactionCategory[]
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
 }
 
 model Account {
   id           String        @id @default(cuid()) @map("_id")
   name         String
   balance      Float         @default(0)
+  active       Boolean       @default(true)
+  currency     String        @default("USD")
   userId       String
   user         User          @relation(fields: [userId], references: [id])
   transactions Transaction[]
@@ -35,16 +40,38 @@ model Account {
 }
 
 model Transaction {
-  id        String          @id @default(cuid()) @map("_id")
-  amount    Float
-  accountId String
-  type      TransactionType
-  account   Account         @relation(fields: [accountId], references: [id])
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  id         String              @id @default(cuid()) @map("_id")
+  amount     Float
+  type       TransactionType
+  category   TransactionCategory @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  account    Account             @relation(fields: [accountId], references: [id])
+  accountId  String
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
 }
 
 enum TransactionType {
   MONEY_IN
   MONEY_OUT
+}
+
+model TransactionCategory {
+  id          Int                     @id @map("_id")
+  name        String
+  type        TransactionCategoryType
+  code        Int                     @unique
+  userId      String
+  user        User                    @relation(fields: [userId], references: [id])
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  transaction Transaction[]
+}
+
+enum TransactionCategoryType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
 }

@@ -2,35 +2,36 @@ import "reflect-metadata";
 
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
-import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { PrismaClient } from "@prisma/client";
 import { json } from "body-parser";
 import RedisStore from "connect-redis";
 import cors from "cors";
 import express from "express";
 import session from "express-session";
-import http from "http";
 import * as redis from "redis";
 import * as tq from "type-graphql";
 import { Context } from "./context";
-import { AccountResolver, AuthResolver, UserResolver } from "./resolvers";
+import {
+  AccountResolver,
+  AuthResolver,
+  TransactionResolver,
+  UserResolver,
+} from "./resolvers";
 
 const app = async () => {
+  const prisma = new PrismaClient();
   const app = express();
-  const httpServer = http.createServer(app);
-
-  const server = new ApolloServer<Context>({
-    schema: await tq.buildSchema({
-      resolvers: [AuthResolver, UserResolver, AccountResolver],
-    }),
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-  });
-  await server.start();
 
   const redisClient = redis.createClient();
   redisClient.connect();
 
   app.set("trust proxy", 1);
+  app.use(
+    cors({
+      origin: ["http://localhost:4000", "http://localhost:5173"],
+      credentials: true,
+    })
+  );
   app.use(
     session({
       name: "qid",
@@ -40,9 +41,9 @@ const app = async () => {
       }),
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        secure: true,
         httpOnly: true,
-        sameSite: "none",
+        sameSite: "lax",
+        secure: false, // true,
       },
       secret: "secret",
       saveUninitialized: false,
@@ -50,22 +51,30 @@ const app = async () => {
     })
   );
 
-  const prisma = new PrismaClient();
+  const server = new ApolloServer<Context>({
+    schema: await tq.buildSchema({
+      resolvers: [
+        AuthResolver,
+        UserResolver,
+        AccountResolver,
+        TransactionResolver,
+      ],
+      validate: false,
+    }),
+  });
+  await server.start();
+
   app.use(
     "/",
-    cors<cors.CorsRequest>({
-      credentials: true,
-    }),
     json(),
     expressMiddleware(server, {
       context: async ({ req, res }) => ({ prisma, req, res }),
     })
   );
 
-  await new Promise<void>((resolve) =>
-    httpServer.listen({ port: 4000 }, resolve)
-  );
-  console.log(`🚀 Server ready at http://localhost:4000/`);
+  app.listen(4000, () => {
+    console.log(`🚀 Server ready at http://localhost:4000/`);
+  });
 };
 
 app();
